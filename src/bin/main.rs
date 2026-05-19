@@ -1,17 +1,38 @@
-use std::{fs::File, io::{self, Read, Write}, net::{SocketAddr, TcpListener, TcpStream}};
+extern crate simple_http_server;
+
+// use std::{fs::File, io::{self, Read, Write}, net::{SocketAddr, TcpListener, TcpStream}};
+use std::fs::File;
+use std::io;
+use std::io::Read;
+use std::io::Write;
+use std::net::SocketAddr;
+use std::net::TcpListener;
+use std::net::TcpStream;
+
+use simple_http_server::ThreadPool;
+
 
 fn main() {
+    const THREAD_MAX: usize = 16;
     const PORT: u16 = 1151;
+
     let listener = match bind_available_port(PORT) {
         Ok(listener) => listener,
         Err(_) => panic!("Failed to create TCP listener."),
     };
 
+    let pool = ThreadPool::new(THREAD_MAX);
+
     // ストリームからメッセージを表示
     for stream in listener.incoming() {
         let stream = stream.unwrap();
-        handle_connection_stream(stream);
+
+        pool.execute(|| {
+            handle_connection_stream(stream);
+        });
     }
+
+    println!("Server shutting down.");
 }
 
 // TCPストリームのハンドリング関数
