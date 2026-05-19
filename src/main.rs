@@ -1,4 +1,4 @@
-use std::{io::{self, Read}, net::{SocketAddr, TcpListener, TcpStream}};
+use std::{fs::File, io::{self, Read, Write}, net::{SocketAddr, TcpListener, TcpStream}};
 
 fn main() {
     const PORT: u16 = 1151;
@@ -22,7 +22,28 @@ fn handle_connection_stream(mut stream: TcpStream) {
     // ストリームから読み取ったデータをバッファへ読み込み
     stream.read(&mut buffer).unwrap();
 
+    // u8 を安全にUTF-8に変換して表示
     println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
+
+    // テンプレートHTMLを取得
+    let mut file = File::open("templates/index.html").unwrap();
+    let mut content = String::new();
+    file.read_to_string(&mut content).unwrap();
+
+    // レスポンスをストリームへ書き込み
+    let response_status = "HTTP/1.1 200 OK";
+    let response_header = "";
+    let response_body   = content;
+
+    stream.write(
+        format!(
+            "{}\r\n{}\r\n{}",
+            response_status,
+            response_header,
+            response_body,
+        ).as_bytes()
+    ).unwrap();
+    stream.flush().unwrap();
 }
 
 // 使用できるポートでTCPリスナーを作成する関数

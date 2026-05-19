@@ -4,6 +4,22 @@
 `std::net::TcpListener` を使用することでTCP接続をリッスンすることができる．
 `TcpListener::bind(addr)` でリスナーを取得できる．
 
+## HTTPリクエスト
+### フォーマット
+```
+Method Request-URI HTTP-Version \r\n
+headers \r\n
+message-body
+```
+
+## HTTPレスポンス
+### フォーマット
+```
+HTTP-Version Status-Code Reason-Phrase \r\n
+headers \r\n
+message-body
+```
+
 ## Rustについて
 ### Result<T, E> / unwrap()
 正常な時にTの値，失敗時にEを返す．
